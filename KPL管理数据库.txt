@@ -1,0 +1,137 @@
+一、概念设计 ER图
+1.选手Player
+选手id，Pid
+选手昵称，Pname
+年龄，Page
+性别，Psex
+主玩位置，Plocation（对抗路、中路、打野、发育路、游走）
+工资，Psalary
+
+
+2.战队Team
+战队id，Tid
+队名，Tname
+主场城市，Tcity
+战队积分，Tpoints
+
+3.教练Coach
+教练id Cid
+姓名 Cname
+年龄 Cage
+性别 Csex
+工资 Csalary
+
+4.英雄Hero
+英雄ID Hid
+英雄名  Hname
+角色  Hrole(如战士、法师、刺客等)
+
+5.经理Manager
+经理id,Mid
+姓名，Mname
+年龄，Mage
+性别，Msex
+
+6.联赛League
+联赛ID Lid
+联赛名称 Lname
+联赛级别 Llevel
+积分规则 Lrule
+
+7.队长Captain
+队长id，CPid
+队长昵称，CPname
+年龄，CPage
+性别，CPsex
+主玩位置，CPlocation（对抗路、中路、打野、发育路、游走）
+工资，CPsalary
+二、逻辑设计 
+转化过程：
+(1)实体转为关系模式
+Player(Pid#,Pname,Page,Psex,Plocation,Psalary)
+Hero(Hid#,Hname,Hrole)
+Team(Tid#,Tname,Tcity,Tpoints)
+Coach(Cid#,Cname,Cage,Csex,Csalary)
+Manager(Mid#,Mname,Mage,Msex)
+League(Lid#,Lname,Llevel,Lrule)
+Captain(CPid#,CPname,CPage,CPsex,CPlocation,CPsalary)
+(2)联系转为关系模式
+1.多对多
+1.选手与英雄
+Skilled(Pid#,Hid#,Sdegree)   擅长关系:Sdegree擅长程度
+战队与联赛：
+Attend(Tid#,Lid#)
+2.一对多
+战队与选手：
+TP(Pid#,Tid)或
+Player(Pid#,Pname,Page,Psex,Plocation,Psalary,Pcaptain,Tid) 
+3.一对一
+战队与教练:
+TC(Tid#,Cid)或
+Team(Tid#,Tname,Tcity,Tpoints,Cid)    
+战队与经理：
+Team(Tid#,Tname,Tcity,Tpoints,Cid,Mid) 
+队长与战队：
+Player(Pid#,CPname,CPage,CPsex,CPlocation,CPsalary,CPcaptain,Tid) 
+4.自联系处理：
+选手与队长-
+Player(Pid#,Pname,Page,Psex,Plocation,Psalary,Pcaptain,Tid) captain:0或1
+(3)关系模式：
+Player(Pid#,Pname,Page,Psex,Plocation,Psalary,Pcaptain,Tid)
+Hero(Hid#,Hname,Hrole)
+Team(Tid#,Tname,Tcity,Tpoints,Cid,Mid)
+Coach(Cid#,Cname,Cage,Csex,Csalary)
+Manager(Mid#,Mname,Mage,Msex)
+League(Lid#,Lname,Llevel,Lrule)
+Skilled(Pid#,Hid#,Sdegree) 
+Attend(Tid#,Lid#)
+(4)数据模型优化
+关系模式优化到第三范式：
+分析各关系模式可知都满足1NF。Player关系存在部分函数依赖
+1.Player关系
+Pid->Pname,Page,Psex,Plocation
+（Pid,Tid)->Psalary，Pcaptain
+Player关系存在部分函数依赖
+Player(Pid#,Pname,Page,Psex,Plocation)Pname非空、Plocation（对抗路、中路、打野、发育路、游走）
+PT(Pid#,Tid,Psalary,Pcaptain)  外码Tid，Pcaptain:0或1
+
+2.Hero关系
+Hid->Hname,Hrole
+满足3NF
+Hero(Hid#,Hname,Hrole)
+
+3.Team关系与Attend关系
+Tid->Tname,Tcity,Cid,Mid
+(Tid,Lid)->Tpoints
+Team(Tid#,Tname,Tcity,Mid)
+Attend(Tid#,Lid#,Tpoints)
+
+4.Coach关系
+Cid->Cname,Cage,Csex
+(Cid,Tid)->Csalary
+Coach(Cid#,Cname,Cage,Csex)
+CT(Cid#,Tid,Csalary)
+
+5.Manager关系
+Mid->Mname,Mage,Msex
+Manager(Mid#,Mname,Mage,Msex)
+
+6.League关系
+Lid->Lname,Llevel,Lrule
+League(Lid#,Lname,Llevel,Lrule)
+
+7.Skilled关系 
+(Pid,Hid)->Sdegree
+Skilled(Pid#,Hid#,Sdegree) 
+
+经过规范化理论优化，得到最终如下关系模式：
+Player(Pid#,Pname,Page,Psex,Plocation)Pname非空、Plocation（对抗路、中路、打野、发育路、游走）
+PT(Pid#,Tid,Psalary,Pcaptain)  外码Tid，Pcaptain:0或1
+Hero(Hid#,Hname,Hrole)
+Team(Tid#,Tname,Tcity,Mid)   外码Mid 
+Coach(Cid#,Cname,Cage,Csex)
+CT(Cid#,Tid,Csalary)         外码Tid
+Manager(Mid#,Mname,Mage,Msex)
+League(Lid#,Lname,Llevel,Lrule)
+Skilled(Pid#,Hid#,Sdegree) 
+Attend(Tid#,Lid#,Tpoints)
